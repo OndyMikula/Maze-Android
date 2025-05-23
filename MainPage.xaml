@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Maze_Accelerometer.MainPage">
+
+    <Grid BackgroundColor="LightSlateGray">
+        <GraphicsView x:Name="Gameplay" />
+
+        <VerticalStackLayout Padding="10" Spacing="5">
+            <Label x:Name="ScoreLabel"
+                   Text="Score: 0"
+                   FontSize="22"
+                   TextColor="White"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"/>
+            <Label x:Name="AccelerometerDebugLabel"
+                   Text="Accel: X=0.0, Y=0.0, Z=0.0"
+                   FontSize="10"
+                   TextColor="Wheat"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <StackLayout x:Name="WinScreenLayout"
+                     IsVisible="False"
+                     BackgroundColor="#AA000000"
+                     VerticalOptions="Center"
+                     HorizontalOptions="Center"
+                     Padding="30"
+                     Spacing="20">
+            <Label Text="YOU WIN!"
+                   FontSize="52"
+                   TextColor="Gold"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+            <Label x:Name="FinalScoreLabel"
+                   Text="Final Score: 0"
+                   FontSize="20"
+                   TextColor="White"
+                   HorizontalTextAlignment="Center"/>
+                <Button Text="Play Again?"
+                    Clicked="OnPlayAgainClicked"
+                    BackgroundColor="ForestGreen"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="15,10"/>
+        </StackLayout>
+    </Grid>
+
+</ContentPage>
