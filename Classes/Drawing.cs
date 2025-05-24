@@ -24,7 +24,8 @@ namespace Maze_Accelerometer.Classes
             public Vector2 AccelerationInput { get; set; } = Vector2.Zero;
             // Konstanta pro rychlost pohybu kuličky - TUTO BUDEŠ MOŽNÁ CHTÍT LADIT
             private const float MoveSpeed = 2;
-            private const float BallRadius = 8; // Menší kulička pro snazší průchod bludištěm
+            private const float BallRadius = 8;
+
 
             public MazeGameDrawable() { }
 
@@ -49,84 +50,59 @@ namespace Maze_Accelerometer.Classes
 
             private void DefineMazeWalls()
             {
-                // Toto je příklad VELMI JEDNODUCHÉHO bludiště.
-                // Budeš si muset vytvořit vlastní definici zdí pro spirálu.
-                // (x, y, šířka, výška)
                 float wallThickness = 10;
                 Color wallColor = Colors.DarkSlateGray;
 
-                // Vnější ohraničení
-                Walls.Add(new Wall(0, 0, CanvasWidth, wallThickness, wallColor));                           // Horní
-                Walls.Add(new Wall(0, CanvasHeight - wallThickness, CanvasWidth, wallThickness, wallColor)); // Dolní
-                Walls.Add(new Wall(0, 0, wallThickness, CanvasHeight, wallColor));                          // Levá
-                Walls.Add(new Wall(CanvasWidth - wallThickness, 0, wallThickness, CanvasHeight, wallColor)); // Pravá
 
-                // Příklad vnitřních zdí - vytvoř si zde vlastní spirálu!
-                // Tloušťka = wallThickness
-                // Chodba = např. 3 * BallRadius * 2 (pro průchod) ~ 48
+                float wallX = wallThickness;
+                float wallY = wallThickness;
+                float wallYRange;
+                float wallXRange;
 
-                // Příklad pro začátek spirály:
-                // Předpokládejme, že kulička startuje v (30,30)
-                // Chodba je široká např. 50
-                // 0,0 je levý horní roh
-                float pathWidth = BallRadius * 2 + 20; // Šířka chodby, aby se kulička vešla + rezerva
-                float currentX = wallThickness;
-                float currentY = wallThickness;
-
+                #region Hranice bludiště
+                
                 // 1. Horní zeď:
                 //    Začíná za vstupní mezerou vlevo, končí u pravé vnější zdi.
                 Walls.Add(new Wall(
-                    wallThickness + pathWidth, // Začátek X (za vstupní mezerou)
-                    wallThickness,             // Začátek Y (horní okraj vnitřní plochy)
-                    CanvasWidth - wallThickness - (wallThickness + pathWidth), // Délka zdi
-                    wallThickness,             // Výška zdi (tloušťka)
+                    wallX = 0, // Začátek X od levyho okraje (385)
+                    wallY = 0,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 400, // Délka zdi (x range - 400, normal 10))
+                    wallYRange = 10,             // Výška zdi (y range - 760, normal 10)
                     wallColor
                 ));
 
-                // 2. Pravá zeď:
+                // 2. Levá zeď:
                 //    Začíná od horního okraje, končí u dolního okraje.
                 Walls.Add(new Wall(
-                    CanvasWidth - 2 * wallThickness, // Začátek X (pravý vnitřní okraj)
-                    wallThickness,                   // Začátek Y
-                    wallThickness,                   // Šířka zdi (tloušťka)
-                    CanvasHeight - 2 * wallThickness,  // Výška zdi (přes celou vnitřní výšku)
+                    wallX = 0, // Začátek X od levyho okraje
+                    wallY = 0,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 770,             // Výška zdi (y range - 760)
                     wallColor
                 ));
 
                 // 3. Dolní zeď:
                 //    Začíná u levé vnější zdi, končí PŘED výstupní mezerou vlevo dole.
                 Walls.Add(new Wall(
-                    wallThickness,                                // Začátek X (levý vnitřní okraj)
-                    CanvasHeight - 2 * wallThickness,             // Začátek Y (dolní vnitřní okraj)
-                    CanvasWidth - wallThickness - (wallThickness + pathWidth), // Délka zdi (končí před výstupní mezerou)
-                    wallThickness,                                // Výška zdi (tloušťka)
+                    wallX, // Začátek X od levyho okraje
+                    wallY + 760,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 400, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
                     wallColor
                 ));
 
                 // 4. Levá zeď:
-                //    Má dvě části, aby vytvořila vstup nahoře a výstup dole.
-                //    a) Horní část levé zdi (nad vstupem do další vrstvy):
-                //       Začíná od horního okraje, končí PŘED mezerou pro vstup do další vrstvy spirály.
                 Walls.Add(new Wall(
-                    wallThickness,             // Začátek X (levý vnitřní okraj)
-                    wallThickness,             // Začátek Y
-                    wallThickness,             // Šířka zdi (tloušťka)
-                    CanvasHeight - 2 * wallThickness - pathWidth - wallThickness, // Výška (končí PŘED výstupní mezerou dole)
-                                                                                  // Moje chyba byla zde, původní délka byla moc velká
+                    wallX + 385, // Začátek X od levyho okraje
+                    wallY,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 760,             // Výška zdi (y range - 760)
                     wallColor
                 ));
-                // POZNÁMKA: Startovní pozice kuličky (např. X=30, Y=30) by měla být v chodbě vytvořené těmito zdmi.
-                // Pokračuj v tomto duchu, zmenšuj obdélník a nechávej mezery
-                currentX += wallThickness + pathWidth;
-                currentY += wallThickness + pathWidth;
-                float innerCanvasWidth = CanvasWidth - 2 * (wallThickness + pathWidth);
-                float innerCanvasHeight = CanvasHeight - 2 * (wallThickness + pathWidth);
+                #endregion
+                // POZNÁMKA: Startovní pozice kuličky (např. X=30, Y=30)
 
-                // Pamatuj: souřadnice (0,0) je levý horní roh.
-                // X roste doprava, Y roste dolů.
-
-                // Příklad jednoduché překážky uprostřed, abys viděl kolize:
-                // Walls.Add(new Wall(CanvasWidth/2 - 50, CanvasHeight/2 - 5, 100, 10, wallColor));
+                
             }
 
 
