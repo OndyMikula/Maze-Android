@@ -22,9 +22,9 @@ namespace Maze_Accelerometer.Classes
             public bool IsGameWon { get; private set; } = false;
 
             public Vector2 AccelerationInput { get; set; } = Vector2.Zero;
-            // Konstanta pro rychlost pohybu kuličky - TUTO BUDEŠ MOŽNÁ CHTÍT LADIT
+            // Konstanta pro rychlost pohybu kuličky
             private const float MoveSpeed = 2;
-            private const float BallRadius = 8;
+            private const float BallRadius = 10;
 
 
             public MazeGameDrawable() { }
@@ -60,7 +60,6 @@ namespace Maze_Accelerometer.Classes
                 float wallXRange;
 
                 #region Hranice bludiště
-                
                 // 1. Horní zeď:
                 //    Začíná za vstupní mezerou vlevo, končí u pravé vnější zdi.
                 Walls.Add(new Wall(
@@ -81,17 +80,7 @@ namespace Maze_Accelerometer.Classes
                     wallColor
                 ));
 
-                // 3. Dolní zeď:
-                //    Začíná u levé vnější zdi, končí PŘED výstupní mezerou vlevo dole.
-                Walls.Add(new Wall(
-                    wallX, // Začátek X od levyho okraje
-                    wallY + 760,             // Začátek Y od horniho okraje (750)
-                    wallXRange = 400, // Délka zdi (x range - 400)
-                    wallYRange = 10,             // Výška zdi (y range - 760)
-                    wallColor
-                ));
-
-                // 4. Levá zeď:
+                // 4. Pravá zeď:
                 Walls.Add(new Wall(
                     wallX + 385, // Začátek X od levyho okraje
                     wallY,             // Začátek Y od horniho okraje (750)
@@ -99,10 +88,206 @@ namespace Maze_Accelerometer.Classes
                     wallYRange = 760,             // Výška zdi (y range - 760)
                     wallColor
                 ));
+
+                // 4. Dolní zeď:
+                Walls.Add(new Wall(
+                    wallX, // Začátek X od levyho okraje
+                    wallY + 760,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 400, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
                 #endregion
                 // POZNÁMKA: Startovní pozice kuličky (např. X=30, Y=30)
 
-                
+                //ZNEVIDITELNIT SASKU
+                // V1.1    První neviditelna zed
+                Walls.Add(new Wall(
+                    wallX + 70, // Začátek X od levyho okraje
+                    wallY,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 80,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // H2.1   Začíná za vstupní mezerou vlevo, konci u horni prostupni
+                Walls.Add(new Wall(
+                    wallX + 70, // Začátek X od levyho okraje
+                    wallY + 80,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 160, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                //PRVNI PROSTUPNA
+                // 2.2   Začíná na predchodi zdi, konci mezerou od startu pravy steny chodby do cile
+                Walls.Add(new Wall(
+                    wallX + 230, // Začátek X od levyho okraje
+                    wallY + 80,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 50, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // V2.3   Začíná na prvni prostupny, konci u 3.2
+                Walls.Add(new Wall(
+                    wallX + 280, // Začátek X od levyho okraje
+                    wallY + 80,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 80,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // V2.4.1  Začíná mezerou od horni zdi, konci na druhy prostupny
+                Walls.Add(new Wall(
+                    wallX + 325, // Začátek X od levyho okraje
+                    wallY + 80,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 130,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // DRUHA PROSTUPNA 
+                // V2.4.2   Začíná mezerou od horni zdi, konci mezerou od dolni zdi
+                Walls.Add(new Wall(
+                    wallX + 325, // Začátek X od levyho okraje
+                    wallY + 210,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 60,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // V2.4.3   Začíná mezerou od horni zdi, konci mezerou od dolni zdi
+                Walls.Add(new Wall(
+                    wallX + 325, // Začátek X od levyho okraje
+                    wallY + 270,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 350,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // H3.1   Začíná na levý zdi, končí u první rozdvojky
+                Walls.Add(new Wall(
+                    wallX, // Začátek X od levyho okraje
+                    wallY + 150,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 120, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // H3.2   Začíná za první rozdvojkou, končí u chodby do cíle
+                Walls.Add(new Wall(
+                    wallX + 180, // Začátek X od levyho okraje
+                    wallY + 150,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 100, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // V3.3   Začíná na zacatku 3.2, konci na 5.1
+                Walls.Add(new Wall(
+                    wallX + 180, // Začátek X od levyho okraje
+                    wallY + 160,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 100,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // H4.1   Začíná mezerou od 3.3 (vpravo vstupni chodby), konci na 2.4 (vlevo vedle pravy zdi)
+                Walls.Add(new Wall(
+                    wallX + 230, // Začátek X od levyho okraje
+                    wallY + 200,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 95, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // H5.1 Začíná mezerou od levy zdi, konci u konce vitezny chodby   
+                Walls.Add(new Wall(
+                    wallX + 70, // Začátek X od levyho okraje
+                    wallY + 260,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 180, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // H5.2   Začíná na konci vitezny chodby, konci na 2.4 (nepravejsi zdi)
+                Walls.Add(new Wall(
+                    wallX + 280, // Začátek X od levyho okraje
+                    wallY + 260,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 45, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // V6.1   Začíná na 5.1, konci pred vchodem do fake cilovy chodby
+                Walls.Add(new Wall(
+                    wallX + 70, // Začátek X od levyho okraje
+                    wallY + 260,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 340,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // DRUHA NEVIDITELNA ZED SASKU
+                // V6.2.1   Začíná mezerou od horni zdi, konci mezerou od dolni zdi
+                Walls.Add(new Wall(
+                    wallX + 120, // Začátek X od levyho okraje
+                    wallY + 260,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 70,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                // V6.2.2   Začíná na konci 6.2.1, konci na nejspodnejsi zdi
+                Walls.Add(new Wall(
+                    wallX + 120, // Začátek X od levyho okraje
+                    wallY + 330,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 360,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+
+
+                // H7.1 Začíná mezerou od levy zdi, konci zacatkem treti prostupne zdi
+                Walls.Add(new Wall(
+                    wallX + 70, // Začátek X od levyho okraje
+                    wallY + 680,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 70, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                //TRETI PROSTUPNA ZED
+                // H7.2.1   Začíná koncem 7.1, konci 7.2.2
+                Walls.Add(new Wall(
+                    wallX + 140, // Začátek X od levyho okraje
+                    wallY + 680,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 140, // Délka zdi (x range - 400)
+                    wallYRange = 10,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
+
+                //CTVRTA PROSTUPNA ZED
+                // V7.2.2   Začíná mezerou od cilove chodby, konci na 7.2.1
+                Walls.Add(new Wall(
+                    wallX + 280, // Začátek X od levyho okraje
+                    wallY + 450,             // Začátek Y od horniho okraje (750)
+                    wallXRange = 10, // Délka zdi (x range - 400)
+                    wallYRange = 240,             // Výška zdi (y range - 760)
+                    wallColor
+                ));
             }
 
 
