@@ -29,15 +29,27 @@ namespace Maze_Accelerometer.Classes
         public RectF Bounds => new RectF(Position.X - Radius, Position.Y - Radius, Radius * 2, Radius * 2);
     }
 
+    public enum wallType
+    {
+        Normal,                 // Klasická pevná zeď
+        Invisible,              // Pevná, ale nekreslí se
+        OneWaySolidFromBottom,  // Pevná zespodu (nedá se projít nahoru), prostupná shora (dá se projít dolů)
+        OneWaySolidFromLeft,    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doleva)
+    }
+
     public class Wall
     {
         public RectF Bounds { get; set; }
         public Color FillColor { get; set; }
+        public wallType Type { get; set; }
+        public string tag { get; set; }
 
-        public Wall(float x, float y, float width, float height, Color color)
+        public Wall(float x, float y, float width, float height, Color color, wallType type = wallType.Normal, string tag = null)
         {
             Bounds = new RectF(x, y, width, height);
             FillColor = color;
+            Type = type;
+            Tag = tag;
         }
     }
 

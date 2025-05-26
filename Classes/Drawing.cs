@@ -44,8 +44,8 @@ namespace Maze_Accelerometer.Classes
 
                 // Cíl (uprav dle tvého bludiště)
                 // Např. ve středu
-                float goalSize = BallRadius * 3;
-                GameGoal = new Goal(CanvasWidth / 2 - goalSize / 2, CanvasHeight / 2 - goalSize / 2, goalSize, Colors.Gold);
+                float goalSize = BallRadius * 2;
+                GameGoal = new Goal(200, 400, goalSize, Colors.Gold);
             }
 
             private void DefineMazeWalls()
@@ -107,7 +107,8 @@ namespace Maze_Accelerometer.Classes
                     wallY,             // Začátek Y od horniho okraje (750)
                     wallXRange = 10, // Délka zdi (x range - 400)
                     wallYRange = 80,             // Výška zdi (y range - 760)
-                    wallColor
+                    wallColor,
+                    wallType.Invisible
                 ));
 
 
@@ -128,7 +129,9 @@ namespace Maze_Accelerometer.Classes
                     wallY + 80,             // Začátek Y od horniho okraje (750)
                     wallXRange = 50, // Délka zdi (x range - 400)
                     wallYRange = 10,             // Výška zdi (y range - 760)
-                    wallColor
+                    wallColor,
+                    wallType.Normal,
+                    tag: "projdesShora"
                 ));
 
                 // V2.3   Začíná na prvni prostupny, konci u 3.2
@@ -155,16 +158,18 @@ namespace Maze_Accelerometer.Classes
                     wallX + 325, // Začátek X od levyho okraje
                     wallY + 210,             // Začátek Y od horniho okraje (750)
                     wallXRange = 10, // Délka zdi (x range - 400)
-                    wallYRange = 60,             // Výška zdi (y range - 760)
-                    wallColor
+                    wallYRange = 50,             // Výška zdi (y range - 760)
+                    wallColor,
+                    wallType.OneWaySolidFromLeft
+                    tag: "projdesZleva"
                 ));
 
                 // V2.4.3   Začíná mezerou od horni zdi, konci mezerou od dolni zdi
                 Walls.Add(new Wall(
                     wallX + 325, // Začátek X od levyho okraje
-                    wallY + 270,             // Začátek Y od horniho okraje (750)
+                    wallY + 260,             // Začátek Y od horniho okraje (750)
                     wallXRange = 10, // Délka zdi (x range - 400)
-                    wallYRange = 350,             // Výška zdi (y range - 760)
+                    wallYRange = 430,             // Výška zdi (y range - 760)
                     wallColor
                 ));
 
@@ -246,7 +251,8 @@ namespace Maze_Accelerometer.Classes
                     wallY + 260,             // Začátek Y od horniho okraje (750)
                     wallXRange = 10, // Délka zdi (x range - 400)
                     wallYRange = 70,             // Výška zdi (y range - 760)
-                    wallColor
+                    wallColor,
+                    wallType.Invisible
                 ));
 
                 // V6.2.2   Začíná na konci 6.2.1, konci na nejspodnejsi zdi
@@ -270,23 +276,15 @@ namespace Maze_Accelerometer.Classes
                 ));
 
                 //TRETI PROSTUPNA ZED
-                // H7.2.1   Začíná koncem 7.1, konci 7.2.2
+                // H7.2.   Začíná koncem 7.1, konci 7.2
                 Walls.Add(new Wall(
                     wallX + 140, // Začátek X od levyho okraje
                     wallY + 680,             // Začátek Y od horniho okraje (750)
-                    wallXRange = 140, // Délka zdi (x range - 400)
+                    wallXRange = 185, // Délka zdi (x range - 400)
                     wallYRange = 10,             // Výška zdi (y range - 760)
-                    wallColor
-                ));
-
-                //CTVRTA PROSTUPNA ZED
-                // V7.2.2   Začíná mezerou od cilove chodby, konci na 7.2.1
-                Walls.Add(new Wall(
-                    wallX + 280, // Začátek X od levyho okraje
-                    wallY + 450,             // Začátek Y od horniho okraje (750)
-                    wallXRange = 10, // Délka zdi (x range - 400)
-                    wallYRange = 240,             // Výška zdi (y range - 760)
-                    wallColor
+                    wallColor,
+                    wallType.Normal,
+                    tag: "projdesZeshora"
                 ));
             }
 
@@ -299,13 +297,13 @@ namespace Maze_Accelerometer.Classes
                 // Převrácení Y osy je časté, protože akcelerometr dává kladné Y při naklonění "od sebe",
                 // ale na plátně je Y kladné směrem dolů.
                 Vector2 rawAccel = AccelerationInput;
-                Vector2 movementForce = new Vector2(rawAccel.X, -rawAccel.Y) * MoveSpeed;
+                Vector2 movement = new Vector2(rawAccel.X, -rawAccel.Y) * MoveSpeed;
 
                 // Uložíme si původní pozici pro případ, že bychom se museli vrátit
-                PointF originalPosition = PlayerBall.Position;
+                PointF playerPosition = PlayerBall.Position;
 
                 // 1. Pokus o pohyb v ose X
-                float newX = PlayerBall.Position.X + movementForce.X;
+                float newX = PlayerBall.Position.X + movement.X;
                 RectF testBoundsX = new RectF(newX - PlayerBall.Radius, PlayerBall.Position.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
                 bool collisionX = false;
 
@@ -315,9 +313,9 @@ namespace Maze_Accelerometer.Classes
                     {
                         collisionX = true;
                         // Uprav pozici X tak, aby byla těsně u zdi
-                        if (movementForce.X > 0) // Pohyb doprava
+                        if (movement.X > 0) // Pohyb doprava
                             newX = wall.Bounds.Left - PlayerBall.Radius;
-                        else if (movementForce.X < 0) // Pohyb doleva
+                        else if (movement.X < 0) // Pohyb doleva
                             newX = wall.Bounds.Right + PlayerBall.Radius;
                         break;
                     }
@@ -326,7 +324,7 @@ namespace Maze_Accelerometer.Classes
 
 
                 // 2. Pokus o pohyb v ose Y (s již upravenou X pozicí)
-                float newY = PlayerBall.Position.Y + movementForce.Y;
+                float newY = PlayerBall.Position.Y + movement.Y;
                 RectF testBoundsY = new RectF(PlayerBall.Position.X - PlayerBall.Radius, newY - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
                 bool collisionY = false;
 
@@ -336,9 +334,9 @@ namespace Maze_Accelerometer.Classes
                     {
                         collisionY = true;
                         // Uprav pozici Y tak, aby byla těsně u zdi
-                        if (movementForce.Y > 0) // Pohyb dolů
+                        if (movement.Y > 0) // Pohyb dolů
                             newY = wall.Bounds.Top - PlayerBall.Radius;
-                        else if (movementForce.Y < 0) // Pohyb nahoru
+                        else if (movement.Y < 0) // Pohyb nahoru
                             newY = wall.Bounds.Bottom + PlayerBall.Radius;
                         break;
                     }
@@ -362,37 +360,43 @@ namespace Maze_Accelerometer.Classes
 
             public void Draw(ICanvas canvas, RectF dirtyRect)
             {
-                // Vykreslení pozadí (pokud není v XAML)
-                // canvas.FillColor = Colors.LightSteelBlue;
-                // canvas.FillRectangle(dirtyRect);
-
-                // Vykreslení zdí
                 foreach (var wall in Walls)
                 {
+                    if (wall.Type == wallType.Invisible) continue; // Neviditelné zdi nekreslíme
+
                     canvas.FillColor = wall.FillColor;
+                    // Pro jednostranné zdi můžeme přidat vizuální indikaci, např. jinou barvu okraje nebo vzor
+                    if (wall.Type != wallType.Normal) // Všechny "speciální" zdi (kromě Invisible)
+                    {
+                        canvas.FillColor = Colors.Brown; // Například oranžový okraj pro OneWay
+                    }
                     canvas.FillRectangle(wall.Bounds);
                 }
 
-                // Vykreslení cíle
                 if (GameGoal != null)
                 {
                     canvas.FillColor = GameGoal.FillColor;
                     canvas.FillRectangle(GameGoal.Bounds);
                 }
 
-                // Vykreslení kuličky
                 if (PlayerBall != null)
                 {
                     canvas.FillColor = PlayerBall.FillColor;
                     canvas.FillCircle(PlayerBall.Position.X, PlayerBall.Position.Y, PlayerBall.Radius);
                 }
 
-                // Vykreslení zprávy o výhře (může být i v XAML, pokud se hra zastaví)
                 if (IsGameWon)
                 {
+                    // Kreslení výhry může zůstat zde, nebo být řešeno přes XAML overlay v MainPage
+                    canvas.Alpha = 0.8f;
+                    canvas.FillColor = Colors.Black;
+                    canvas.FillRectangle(0, CanvasHeight * 0.4f, CanvasWidth, CanvasHeight * 0.2f);
+                    canvas.Alpha = 1.0f;
+
                     canvas.FontSize = 30;
-                    canvas.FontColor = Colors.Green;
-                    canvas.DrawString("YOU WIN!", CanvasWidth / 2, CanvasHeight / 2 - 15, HorizontalAlignment.Center);
+                    canvas.FontColor = Colors.LawnGreen; // Změna barvy
+                    string winText = "YOU WIN!";
+                    canvas.DrawString(winText, CanvasWidth / 2, CanvasHeight / 2 - 10, HorizontalAlignment.Center);
                 }
             }
         }
