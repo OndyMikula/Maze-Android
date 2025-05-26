@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Maui.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Maui.Graphics;
-using System.Numerics;
 
 namespace Maze_Accelerometer.Classes
 {
@@ -23,7 +23,7 @@ namespace Maze_Accelerometer.Classes
 
             public Vector2 AccelerationInput { get; set; } = Vector2.Zero;
             // Konstanta pro rychlost pohybu kuličky
-            private const float MoveSpeed = 2;
+            private const float MoveSpeed = 40;
             private const float BallRadius = 10;
 
 
@@ -290,70 +290,94 @@ namespace Maze_Accelerometer.Classes
             {
                 if (IsGameWon || PlayerBall == null) return;
 
-                // Pohyb kuličky na základě akcelerometru
-                // Převrácení Y osy je časté, protože akcelerometr dává kladné Y při naklonění "od sebe",
-                // ale na plátně je Y kladné směrem dolů.
+                var previousPosition = PlayerBall.Position;
                 Vector2 rawAccel = AccelerationInput;
-                Vector2 movementForce = new Vector2(rawAccel.X, -rawAccel.Y) * MoveSpeed;
+                Vector2 movementForce = new Vector2(rawAccel.X, -rawAccel.Y) * MoveSpeed * deltaTime;
 
-                // Uložíme si původní pozici pro případ, že bychom se museli vrátit
-                PointF originalPosition = PlayerBall.Position;
+                // Předpověď nové pozice
+                PointF newPosition = new PointF(
+                    PlayerBall.Position.X + movementForce.X,
+                    PlayerBall.Position.Y + movementForce.Y
+                );
 
-                // 1. Pokus o pohyb v ose X
-                float newX = PlayerBall.Position.X + movementForce.X;
-                RectF testBoundsX = new RectF(newX - PlayerBall.Radius, PlayerBall.Position.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
-                bool collisionX = false;
-
-                foreach (var wall in Walls)
-                {
-                    if (testBoundsX.IntersectsWith(wall.Bounds))
-                    {
-                        collisionX = true;
-                        // Uprav pozici X tak, aby byla těsně u zdi
-                        if (movementForce.X > 0) // Pohyb doprava
-                            newX = wall.Bounds.Left - PlayerBall.Radius;
-                        else if (movementForce.X < 0) // Pohyb doleva
-                            newX = wall.Bounds.Right + PlayerBall.Radius;
-                        break;
-                    }
-                }
-                PlayerBall.Position = new PointF(newX, PlayerBall.Position.Y);
-
-
-                // 2. Pokus o pohyb v ose Y (s již upravenou X pozicí)
-                float newY = PlayerBall.Position.Y + movementForce.Y;
-                RectF testBoundsY = new RectF(PlayerBall.Position.X - PlayerBall.Radius, newY - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
-                bool collisionY = false;
+                // 1️⃣ Pohyb v ose X
+                PointF newPosX = new PointF(newPosition.X, PlayerBall.Position.Y);
+                RectF boundsX = new RectF(newPosX.X - PlayerBall.Radius, newPosX.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
+                bool collidedX = false;
 
                 foreach (var wall in Walls)
                 {
-                    if (testBoundsY.IntersectsWith(wall.Bounds))
+                    if (boundsX.IntersectsWith(wall.Bounds))
                     {
-                        collisionY = true;
-                        // Uprav pozici Y tak, aby byla těsně u zdi
-                        if (movementForce.Y > 0) // Pohyb dolů
-                            newY = wall.Bounds.Top - PlayerBall.Radius;
-                        else if (movementForce.Y < 0) // Pohyb nahoru
-                            newY = wall.Bounds.Bottom + PlayerBall.Radius;
-                        break;
+                        bool block = wall.Type switch
+                        {
+                            wallType.Normal => true,
+                            wallType.Invisible => true,
+                            wallType.OneWaySolidFromRight =>
+                                movementForce.X < 0 && boundsX.Right > wall.Bounds.Left && PlayerBall.Bounds.Left < wall.Bounds.Right,
+                            _ => true
+                        };
+
+                        if (block)
+                        {
+                            collidedX = true;
+                            break;
+                        }
                     }
                 }
-                PlayerBall.Position = new PointF(PlayerBall.Position.X, newY);
 
+                if (!collidedX)
+                    PlayerBall.Position = new PointF(newPosX.X, PlayerBall.Position.Y);
+                else
+                    movementForce.X = 0;
 
-                // Zajištění, aby kulička neopustila hranice plátna (i když by to měly řešit vnější zdi)
+                // 2️⃣ Pohyb v ose Y
+                PointF newPosY = new PointF(PlayerBall.Position.X, newPosition.Y);
+                RectF boundsY = new RectF(newPosY.X - PlayerBall.Radius, newPosY.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
+                bool collidedY = false;
+
+                foreach (var wall in Walls)
+                {
+                    if (boundsY.IntersectsWith(wall.Bounds))
+                    {
+                        bool block = wall.Type switch
+                        {
+                            wallType.Normal => true,
+                            wallType.Invisible => true,
+                            wallType.OneWaySolidFromBottom =>
+                                movementForce.Y < 0 && boundsY.Top < wall.Bounds.Bottom && PlayerBall.Bounds.Bottom > wall.Bounds.Bottom,
+                            _ => true
+                        };
+
+                        if (block)
+                        {
+                            collidedY = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!collidedY)
+                    PlayerBall.Position = new PointF(PlayerBall.Position.X, newPosY.Y);
+                else
+                    movementForce.Y = 0;
+
+                // Poslední úprava pozice kvůli okrajům
                 PlayerBall.Position = new PointF(
                     Math.Clamp(PlayerBall.Position.X, PlayerBall.Radius, CanvasWidth - PlayerBall.Radius),
                     Math.Clamp(PlayerBall.Position.Y, PlayerBall.Radius, CanvasHeight - PlayerBall.Radius)
                 );
 
-
-                // Detekce cíle
+                // Cíl
                 if (GameGoal != null && PlayerBall.Bounds.IntersectsWith(GameGoal.Bounds))
                 {
                     IsGameWon = true;
                 }
+
+                // Uložení rychlosti pro případné efekty (třeba plynulejší animace)
+                PlayerBall.Velocity = movementForce / deltaTime;
             }
+
 
             public void Draw(ICanvas canvas, RectF dirtyRect)
             {
