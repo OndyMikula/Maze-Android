@@ -34,7 +34,7 @@ namespace Maze_Accelerometer.Classes
         Normal,                 // Klasická pevná zeď
         Invisible,              // Pevná, ale nekreslí se
         OneWaySolidFromBottom,  // Pevná zespodu (nedá se projít nahoru), prostupná shora (dá se projít dolů)
-        OneWaySolidFromLeft,    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doleva)
+        OneWaySolidFromRight,    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doprava)
     }
 
     public class Wall

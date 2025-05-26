@@ -159,7 +159,7 @@ namespace Maze_Accelerometer.Classes
                     wallXRange = 10, // Délka zdi (x range - 400)
                     wallYRange = 50,             // Výška zdi (y range - 760)
                     wallColor,
-                    wallType.OneWaySolidFromLeft
+                    wallType.OneWaySolidFromRight
                 ));
 
                 // V2.4.3   Začíná mezerou od horni zdi, konci mezerou od dolni zdi
