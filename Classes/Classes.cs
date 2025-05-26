@@ -42,7 +42,7 @@ namespace Maze_Accelerometer.Classes
         public RectF Bounds { get; set; }
         public Color FillColor { get; set; }
         public wallType Type { get; set; }
-        public string tag { get; set; }
+        public string Tag { get; set; }
 
         public Wall(float x, float y, float width, float height, Color color, wallType type = wallType.Normal, string tag = null)
         {
