@@ -34,7 +34,16 @@ namespace Maze_Accelerometer.Classes
         Normal,                 // Klasická pevná zeď
         Invisible,              // Pevná, ale nekreslí se
         OneWaySolidFromBottom,  // Pevná zespodu (nedá se projít nahoru), prostupná shora (dá se projít dolů)
-        OneWaySolidFromRight,    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doprava)
+        OneWaySolidFromRight    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doprava)
+    }
+
+    public enum SceneType
+    {
+        Start,
+        Level1,
+        Level2,
+        Level3,
+        Win
     }
 
     public class Wall

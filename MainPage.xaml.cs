@@ -1,6 +1,7 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
 using static Maze_Accelerometer.Classes.Drawing;
 using System.Diagnostics;
+using Maze_Accelerometer.Classes;
 
 namespace Maze_Accelerometer
 {
@@ -10,6 +11,11 @@ namespace Maze_Accelerometer
         private IDispatcherTimer _gameLoopTimer;
         private bool _isViewInitialized = false;
         private DateTime _lastFrameTime;
+
+        private SceneType _currentScene;
+        private TitleScreenDrawable _titleScreenDrawable;
+        private Drawing _gameDrawable;
+        private WinScreenDrawable _winScreenDrawable;
 
         private const float AccelerometerSensitivityFactor = 15;
 
@@ -24,7 +30,6 @@ namespace Maze_Accelerometer
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            Debug.WriteLine("MainPage Appearing");
 
             // Použijeme Gameplay.Width a Gameplay.Height
             if (!_isViewInitialized && Gameplay.Width > 0 && Gameplay.Height > 0)

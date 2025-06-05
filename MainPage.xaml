@@ -14,6 +14,26 @@
                    HorizontalOptions="Center" />
         </VerticalStackLayout>
 
+        <StackLayout x:Name="StartScreenLayout"
+             IsVisible="False"
+             BackgroundColor="#AA000000"
+             VerticalOptions="Center"
+             HorizontalOptions="Center"
+             Padding="30"
+             Spacing="20">
+            <Label Text="Maze Accelerometer"
+                   FontSize="52"
+                   TextColor="Gold"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+            <Button Text="ZAČÍT"
+                    Clicked="StartClicked"
+                    BackgroundColor="ForestGreen"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="15,10"/>
+        </StackLayout>
+
         <StackLayout x:Name="WinScreenLayout"
                      IsVisible="False"
                      BackgroundColor="#AA000000"

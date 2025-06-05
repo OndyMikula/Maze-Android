@@ -27,7 +27,7 @@ namespace Maze_Accelerometer.Classes
             private const float BallRadius = 10;
 
 
-            public MazeGameDrawable() { }
+            public MazeGameDrawable();
 
             public void InitializeGame(float canvasWidth, float canvasHeight)
             {
@@ -39,7 +39,7 @@ namespace Maze_Accelerometer.Classes
                 PlayerBall = new Ball(30, 30, BallRadius, Colors.DodgerBlue);
 
                 Walls.Clear();
-                DefineMazeWalls(); // Metoda pro definici zdí
+                DefineMazeWalls(); // Definici zdí
 
                 // Cíl
                 // Např. ve středu
@@ -412,12 +412,19 @@ namespace Maze_Accelerometer.Classes
                     canvas.FillCircle(PlayerBall.Position.X, PlayerBall.Position.Y, PlayerBall.Radius);
                 }
 
-                // Zpráva žes vyrál šášulo
+                // Zpráva žes vyhrál šášulo
                 if (IsGameWon)
                 {
                     canvas.FontSize = 30;
                     canvas.FontColor = Colors.Green;
                     canvas.DrawString("YOU WIN!", CanvasWidth / 2, CanvasHeight / 2 - 15, HorizontalAlignment.Center);
+                }
+
+                if (!Start)
+                {
+                    canvas.FontSize = 30;
+                    canvas.FontColor = Colors.Green;
+                    canvas.DrawString("START", CanvasWidth / 2, CanvasHeight / 2 - 15, HorizontalAlignment.Center);
                 }
             }
         }
