@@ -22,7 +22,7 @@ namespace Maze_Accelerometer.Classes
             public bool IsGameWon { get; private set; } = false;
 
             public Vector2 AccelerationInput { get; set; } = Vector2.Zero;
-            // Konstanta pro rychlost pohybu kuličky
+
             private const float MoveSpeed = 40;
             private const float BallRadius = 10;
 
@@ -35,17 +35,16 @@ namespace Maze_Accelerometer.Classes
                 CanvasHeight = canvasHeight;
                 IsGameWon = false;
 
-                // Startovní pozice kuličky (uprav dle tvého bludiště)
-                // Např. vlevo nahoře v první chodbě
+                // Startovní pozice kuličky 
                 PlayerBall = new Ball(30, 30, BallRadius, Colors.DodgerBlue);
 
                 Walls.Clear();
                 DefineMazeWalls(); // Metoda pro definici zdí
 
-                // Cíl (uprav dle tvého bludiště)
+                // Cíl
                 // Např. ve středu
                 float goalSize = BallRadius * 2;
-                GameGoal = new Goal(200, 400, goalSize, Colors.Gold);
+                GameGoal = new Goal(200, 600, goalSize, Colors.Gold);
             }
 
             private void DefineMazeWalls()
@@ -59,6 +58,7 @@ namespace Maze_Accelerometer.Classes
                 float wallYRange;
                 float wallXRange;
 
+                #region Zdi bludiště
                 #region Hranice bludiště
                 // 1. Horní zeď:
                 //    Začíná za vstupní mezerou vlevo, končí u pravé vnější zdi.
@@ -283,6 +283,7 @@ namespace Maze_Accelerometer.Classes
                     wallColor,
                     wallType.OneWaySolidFromBottom
                 ));
+                #endregion
             }
 
 
@@ -309,13 +310,14 @@ namespace Maze_Accelerometer.Classes
                 {
                     if (boundsX.IntersectsWith(wall.Bounds))
                     {
-                        bool block = wall.Type switch
+                        bool block = wall.Type 
+                        switch
                         {
                             wallType.Normal => true,
                             wallType.Invisible => true,
                             wallType.OneWaySolidFromRight =>
                                 movementForce.X < 0 && boundsX.Right > wall.Bounds.Left && PlayerBall.Bounds.Left < wall.Bounds.Right,
-                            _ => true
+                            _ => true //
                         };
 
                         if (block)
@@ -340,13 +342,14 @@ namespace Maze_Accelerometer.Classes
                 {
                     if (boundsY.IntersectsWith(wall.Bounds))
                     {
-                        bool block = wall.Type switch
+                        bool block = wall.Type 
+                        switch
                         {
                             wallType.Normal => true,
                             wallType.Invisible => true,
                             wallType.OneWaySolidFromBottom =>
                                 movementForce.Y < 0 && boundsY.Top < wall.Bounds.Bottom && PlayerBall.Bounds.Bottom > wall.Bounds.Bottom,
-                            _ => true
+                            _ => true //
                         };
 
                         if (block)
@@ -380,21 +383,17 @@ namespace Maze_Accelerometer.Classes
 
 
             public void Draw(ICanvas canvas, RectF dirtyRect)
-            {
-                // Vykreslení pozadí (pokud není v XAML)
-                // canvas.FillColor = Colors.LightSteelBlue;
-                // canvas.FillRectangle(dirtyRect);
-
+            { 
                 // Vykreslení zdí
                 foreach (var wall in Walls)
                 {
-                    if (wall.Type == wallType.Invisible) continue; // Neviditelné zdi nekreslíme
+                    if (wall.Type == wallType.Invisible) continue; // Neviditelnou nekreslim more
 
                     canvas.FillColor = wall.FillColor;
-                    // Pro jednostranné zdi můžeme přidat vizuální indikaci, např. jinou barvu okraje nebo vzor
+
                     if (wall.Type != wallType.Normal) // Všechny "speciální" zdi (kromě Invisible)
                     {
-                        canvas.FillColor = Colors.Brown; // Například oranžový okraj pro OneWay
+                        canvas.FillColor = Colors.Brown;
                     }
                     canvas.FillRectangle(wall.Bounds);
                 }
@@ -413,7 +412,7 @@ namespace Maze_Accelerometer.Classes
                     canvas.FillCircle(PlayerBall.Position.X, PlayerBall.Position.Y, PlayerBall.Radius);
                 }
 
-                // Vykreslení zprávy o výhře (může být i v XAML, pokud se hra zastaví)
+                // Zpráva žes vyrál šášulo
                 if (IsGameWon)
                 {
                     canvas.FontSize = 30;
