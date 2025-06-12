@@ -13,7 +13,6 @@ namespace Maze_Accelerometer.Classes
         public PointF Position { get; set; }
         public float Radius { get; set; }
         public Color FillColor { get; set; }
-        // Přidáme Velocity pro případ, že bychom ji později chtěli pro plynulejší pohyb nebo efekty
         public Vector2 Velocity { get; set; }
 
 
@@ -25,7 +24,7 @@ namespace Maze_Accelerometer.Classes
             Velocity = Vector2.Zero;
         }
 
-        // Bounds pro detekci kolizí
+        // collision checking
         public RectF Bounds => new RectF(Position.X - Radius, Position.Y - Radius, Radius * 2, Radius * 2);
     }
 
@@ -37,7 +36,7 @@ namespace Maze_Accelerometer.Classes
         OneWaySolidFromRight    // Pevná zleva (nedá se projít doprava), prostupná zprava (dá se projít doprava)
     }
 
-    public enum SceneType
+    public enum SceneType //PRIDAT LEVELY
     {
         Start,
         Level1,

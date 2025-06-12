@@ -16,8 +16,8 @@ namespace Maze_Accelerometer.Classes
             public List<Wall> Walls { get; private set; } = new List<Wall>();
             public Goal GameGoal { get; private set; }
 
-            public float CanvasWidth { get; private set; } //Kraje prava a leva
-            public float CanvasHeight { get; private set; } //Kraje horni a dolni sasku jeden
+            public float CanvasWidth { get; private set; } //Edge left & rigt
+            public float CanvasHeight { get; private set; } //Edge top & bottom
 
             public bool IsGameWon { get; private set; } = false;
 
@@ -27,22 +27,17 @@ namespace Maze_Accelerometer.Classes
             private const float BallRadius = 10;
 
 
-            public MazeGameDrawable();
-
             public void InitializeGame(float canvasWidth, float canvasHeight)
             {
                 CanvasWidth = canvasWidth;
                 CanvasHeight = canvasHeight;
                 IsGameWon = false;
 
-                // Startovní pozice kuličky 
-                PlayerBall = new Ball(30, 30, BallRadius, Colors.DodgerBlue);
+                PlayerBall = new Ball(30, 30, BallRadius, Colors.DodgerBlue); //Player start position
 
                 Walls.Clear();
-                DefineMazeWalls(); // Definici zdí
+                DefineMazeWalls();
 
-                // Cíl
-                // Např. ve středu
                 float goalSize = BallRadius * 2;
                 GameGoal = new Goal(200, 600, goalSize, Colors.Gold);
             }
@@ -289,21 +284,23 @@ namespace Maze_Accelerometer.Classes
 
             public void Update(float deltaTime)
             {
-                if (IsGameWon || PlayerBall == null) return;
+                if (IsGameWon || PlayerBall == null)
+                {
+                    return;
+                }
 
                 var previousPosition = PlayerBall.Position;
                 Vector2 rawAccel = AccelerationInput;
                 Vector2 movementForce = new Vector2(rawAccel.X, -rawAccel.Y) * MoveSpeed * deltaTime;
 
-                // Předpověď nové pozice
+                // Future position
                 PointF newPosition = new PointF(
                     PlayerBall.Position.X + movementForce.X,
                     PlayerBall.Position.Y + movementForce.Y
                 );
 
-                // 1️⃣ Pohyb v ose X
-                PointF newPosX = new PointF(newPosition.X, PlayerBall.Position.Y);
-                RectF boundsX = new RectF(newPosX.X - PlayerBall.Radius, newPosX.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
+                PointF newPosX = new PointF(newPosition.X, PlayerBall.Position.Y); //future position
+                RectF boundsX = new RectF(newPosX.X - PlayerBall.Radius, newPosX.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2); //x box colliders
                 bool collidedX = false;
 
                 foreach (var wall in Walls)
@@ -317,7 +314,7 @@ namespace Maze_Accelerometer.Classes
                             wallType.Invisible => true,
                             wallType.OneWaySolidFromRight =>
                                 movementForce.X < 0 && boundsX.Right > wall.Bounds.Left && PlayerBall.Bounds.Left < wall.Bounds.Right,
-                            _ => true //
+                            _ => true //can go from left to right but not the other way
                         };
 
                         if (block)
@@ -333,9 +330,9 @@ namespace Maze_Accelerometer.Classes
                 else
                     movementForce.X = 0;
 
-                // 2️⃣ Pohyb v ose Y
+
                 PointF newPosY = new PointF(PlayerBall.Position.X, newPosition.Y);
-                RectF boundsY = new RectF(newPosY.X - PlayerBall.Radius, newPosY.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2);
+                RectF boundsY = new RectF(newPosY.X - PlayerBall.Radius, newPosY.Y - PlayerBall.Radius, PlayerBall.Radius * 2, PlayerBall.Radius * 2); //y box colliders
                 bool collidedY = false;
 
                 foreach (var wall in Walls)
@@ -365,54 +362,56 @@ namespace Maze_Accelerometer.Classes
                 else
                     movementForce.Y = 0;
 
-                // Poslední úprava pozice kvůli okrajům
+                // player collision check
                 PlayerBall.Position = new PointF(
                     Math.Clamp(PlayerBall.Position.X, PlayerBall.Radius, CanvasWidth - PlayerBall.Radius),
                     Math.Clamp(PlayerBall.Position.Y, PlayerBall.Radius, CanvasHeight - PlayerBall.Radius)
                 );
 
-                // Cíl
+                // check game won
                 if (GameGoal != null && PlayerBall.Bounds.IntersectsWith(GameGoal.Bounds))
                 {
                     IsGameWon = true;
                 }
 
-                // Uložení rychlosti pro případné efekty (třeba plynulejší animace)
                 PlayerBall.Velocity = movementForce / deltaTime;
             }
 
 
             public void Draw(ICanvas canvas, RectF dirtyRect)
             { 
-                // Vykreslení zdí
+                //walls
                 foreach (var wall in Walls)
                 {
-                    if (wall.Type == wallType.Invisible) continue; // Neviditelnou nekreslim more
+                    if (wall.Type == wallType.Invisible) // invisible walls
+                    {
+                        continue;
+                    }
 
                     canvas.FillColor = wall.FillColor;
 
-                    if (wall.Type != wallType.Normal) // Všechny "speciální" zdi (kromě Invisible)
+                    if (wall.Type != wallType.Normal) // special walls
                     {
                         canvas.FillColor = Colors.Brown;
                     }
                     canvas.FillRectangle(wall.Bounds);
                 }
 
-                // Vykreslení cíle
+                // goal
                 if (GameGoal != null)
                 {
                     canvas.FillColor = GameGoal.FillColor;
                     canvas.FillRectangle(GameGoal.Bounds);
                 }
 
-                // Vykreslení kuličky
+                // player
                 if (PlayerBall != null)
                 {
                     canvas.FillColor = PlayerBall.FillColor;
                     canvas.FillCircle(PlayerBall.Position.X, PlayerBall.Position.Y, PlayerBall.Radius);
                 }
 
-                // Zpráva žes vyhrál šášulo
+                // game won
                 if (IsGameWon)
                 {
                     canvas.FontSize = 30;

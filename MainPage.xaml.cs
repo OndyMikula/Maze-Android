@@ -7,15 +7,15 @@ namespace Maze_Accelerometer
 {
     public partial class MainPage : ContentPage
     {
-        private MazeGameDrawable _gameDrawable;
-        private IDispatcherTimer _gameLoopTimer;
-        private bool _isViewInitialized = false;
-        private DateTime _lastFrameTime;
+        private MazeGameDrawable drawing;
+        private IDispatcherTimer gameTimer;
+        private bool screenInitialized = false;
+        private DateTime lastFrame;
 
-        private SceneType _currentScene;
-        private TitleScreenDrawable _titleScreenDrawable;
-        private Drawing _gameDrawable;
-        private WinScreenDrawable _winScreenDrawable;
+        private SceneType currentScene;
+        private TitleScreenDrawable startScene;
+        private Drawing drawingClass;
+        private WinScreenDrawing winScreen;
 
         private const float AccelerometerSensitivityFactor = 15;
 
@@ -23,63 +23,27 @@ namespace Maze_Accelerometer
         public MainPage()
         {
             InitializeComponent();
-            _gameDrawable = new MazeGameDrawable();
-            Gameplay.Drawable = _gameDrawable; // ZMĚNA: Používáme název "Gameplay" z tvého XAML
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
-            // Použijeme Gameplay.Width a Gameplay.Height
-            if (!_isViewInitialized && Gameplay.Width > 0 && Gameplay.Height > 0)
-            {
-                InitializeAndStartGame();
-            }
-            else if (!_isViewInitialized)
-            {
-                Gameplay.SizeChanged += OnGraphicsViewSizeChanged; // Připojíme handler k "Gameplay"
-            }
-            else
-            {
-                StartGameSystems();
-            }
-        }
-
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-            _gameLoopTimer?.Stop();
-            ToggleAccelerometer(false);
-            Debug.WriteLine("MainPage Disappearing");
-        }
-
-        private void OnGraphicsViewSizeChanged(object sender, EventArgs e)
-        {
-            // Použijeme Gameplay.Width a Gameplay.Height
-            if (Gameplay.Width <= 0 || Gameplay.Height <= 0 || _isViewInitialized)
-                return;
-
-            Gameplay.SizeChanged -= OnGraphicsViewSizeChanged; // Odpojíme handler od "Gameplay"
-            InitializeAndStartGame();
+            drawing = new MazeGameDrawable();
+            Gameplay.Drawing = drawing;
         }
 
         private void InitializeAndStartGame()
         {
-            if (_isViewInitialized && !_gameDrawable.IsGameWon) return;
+            if (screenInitialized && !drawing.IsGameWon) return;
 
-            // Použijeme Gameplay.Width a Gameplay.Height
-            _gameDrawable.InitializeGame((float)Gameplay.Width, (float)Gameplay.Height);
-            _isViewInitialized = true;
+            drawing.InitializeGame((float)Gameplay.Width, (float)Gameplay.Height);
+            screenInitialized = true;
             WinScreenLayout.IsVisible = false;
-            UpdateScoreLabel(); // Aktualizujeme ScoreLabel (i když v MazeGameDrawable není skóre)
-            Debug.WriteLine("Game Initialized and Starting.");
+            UpdateScore(); // PRIDAT SCCORE
             StartGameSystems();
         }
 
         private void StartGameSystems()
         {
-            if (_gameDrawable.IsGameWon) return;
+            if (drawing.IsGameWon)
+            {
+                return;
+            }
 
             ToggleAccelerometer(true);
             StartGameLoop();
@@ -102,22 +66,27 @@ namespace Maze_Accelerometer
                         Accelerometer.Default.ReadingChanged -= Accelerometer_ReadingChanged;
                     }
                 }
-                else { AccelerometerDebugLabel.Text = "Accelerometer not supported."; }
+                else
+                {
+                    AccelerometerDebugLabel.Text = "Accelerometer not supported."; 
+                }
             }
-            catch (Exception ex) { Debug.WriteLine($"Accelerometer error: {ex.Message}"); }
+            catch (Exception ex)
+            { 
+                Debug.WriteLine($"Accelerometer error: {ex.Message}");
+            }
         }
 
         private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
         {
             var accelData = e.Reading.Acceleration;
-            if (_gameDrawable != null)
+            if (drawing != null)
             {
-                _gameDrawable.AccelerationInput = new System.Numerics.Vector2(
+                drawing.AccelerationInput = new System.Numerics.Vector2(
                     -accelData.X * AccelerometerSensitivityFactor,
                     -accelData.Y * AccelerometerSensitivityFactor
                 );
             }
-
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -127,66 +96,59 @@ namespace Maze_Accelerometer
 
         private void StartGameLoop()
         {
-            if (_gameLoopTimer == null)
+            if (gameTimer == null)
             {
-                _gameLoopTimer = Dispatcher.CreateTimer();
-                _gameLoopTimer.Interval = TimeSpan.FromMilliseconds(16);
-                _gameLoopTimer.Tick += GameLoopTimer_Tick;
+                gameTimer = Dispatcher.CreateTimer();
+                gameTimer.Interval = TimeSpan.FromMilliseconds(16);
+                gameTimer.Tick += GameLoopTimer_Tick;
             }
-            if (!_gameLoopTimer.IsRunning)
+            if (!gameTimer.IsRunning)
             {
-                _lastFrameTime = DateTime.Now;
-                _gameLoopTimer.Start();
+                lastFrame = DateTime.Now;
+                gameTimer.Start();
             }
         }
 
         private void GameLoopTimer_Tick(object sender, EventArgs e)
         {
-            if (!_isViewInitialized || _gameDrawable == null) return;
+            if (!screenInitialized || drawing == null)
+            {
+                return;
+            }
 
-
-            if (_gameDrawable.IsGameWon)
+            if (drawing.IsGameWon)
             {
                 if (!WinScreenLayout.IsVisible)
                 {
                     ShowWinScreen();
                 }
-                return; // Pokud je vyhráno, neaktualizujeme dále
+                return;
             }
 
             DateTime currentTime = DateTime.Now;
-            float deltaTime = (float)(currentTime - _lastFrameTime).TotalSeconds;
-            _lastFrameTime = currentTime;
-            deltaTime = Math.Max(0.001f, Math.Min(deltaTime, 0.033f));
+            float deltaTime = (float)(currentTime - lastFrame).TotalSeconds;
+            lastFrame = currentTime;
+            deltaTime = Math.Max(0.001, Math.Min(deltaTime, 0.033));
 
-            _gameDrawable.Update(deltaTime);
-            Gameplay.Invalidate(); // Překreslí herní plochu "Gameplay"
+            drawing.Update(deltaTime);
+            Gameplay.Invalidate(); // Překreslí Gameview "Gameplay"
 
-            if (_gameDrawable.IsGameWon && !WinScreenLayout.IsVisible)
+            if (drawing.IsGameWon && !WinScreenLayout.IsVisible)
             {
                 ShowWinScreen();
             }
-            // ScoreLabel se neaktualizuje z _gameDrawable, protože tam není skóre
-            // Můžeš si přidat logiku pro skóre do MazeGameDrawable a pak zde aktualizovat ScoreLabel
         }
 
-        private void UpdateScoreLabel()
+        private void UpdateScore() //PRIDAT SCORE
         {
-            // V současné MazeGameDrawable není skóre, takže tato metoda nic nedělá.
-            // Pokud bys přidal Score do MazeGameDrawable:
-            // ScoreLabel.Text = $"Score: {_gameDrawable.Score}";
-            // Prozatím můžeme nechat výchozí text nebo jej nastavit:
-            ScoreLabel.Text = "Score: 0"; // Nebo "Reach the Goal!"
+            ScoreLabel.Text = $"Score: {drawing.Score}";
         }
-
 
         private void ShowWinScreen()
         {
-            _gameLoopTimer?.Stop();
+            gameTimer?.Stop();
             ToggleAccelerometer(false);
-            // FinalScoreLabel v této verzi hry nemá dynamickou hodnotu, protože není skóre.
-            // Můžeme ho nastavit na obecný text nebo ho skrýt, pokud není relevantní.
-            FinalScoreLabel.Text = "Congratulations!"; // Nebo můžeš zobrazit čas, pokud bys ho měřil.
+            FinalScoreLabel.Text = $"Your final score is {UpdateScore}!";
             WinScreenLayout.IsVisible = true;
             Debug.WriteLine("Game Won!");
         }
@@ -194,7 +156,7 @@ namespace Maze_Accelerometer
         private void OnPlayAgainClicked(object sender, EventArgs e)
         {
             WinScreenLayout.IsVisible = false;
-            _isViewInitialized = false;
+            screenInitialized = false;
             InitializeAndStartGame();
         }
     }
